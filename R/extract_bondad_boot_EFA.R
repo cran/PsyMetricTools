@@ -1,0 +1,52 @@
+#' Extract Fit Measures from Bootstrap EFA Results
+#'
+#' Extracts and combines fit measures from bootstrap EFA analyses.
+#'
+#' @param resultados_bootstrap A bootstrap result object with Results list.
+#'
+#' @return A data frame of fit measures with sample identifiers.
+#' @examples
+#' # Bootstrap results contain one Bondades list per sample
+#' resultados_bootstrap <- list(
+#'   Results = list(
+#'     list(CombinedResults = list(Bondades = list(
+#'       data.frame(CFI = 0.96, TLI = 0.95, RMSEA = 0.05)
+#'     ))),
+#'     list(CombinedResults = list(Bondades = list(
+#'       data.frame(CFI = 0.97, TLI = 0.96, RMSEA = 0.04)
+#'     )))
+#'   )
+#' )
+#'
+#' # Extract and combine fit measures across all bootstrap samples
+#' fit_measures <- extract_bondad_boot_EFA(resultados_bootstrap)
+#' head(fit_measures)
+#' @export
+extract_bondad_boot_EFA <- function(resultados_bootstrap) {
+  # Cargar las librerías necesarias
+
+  # Función interna para convertir Bondades a list y añadir el número de muestra
+  convertBondadesToList <- function(bondadesList, muestra) {
+    bondadesList %>%
+      purrr::map_dfr(~tibble::as_tibble(.), .id = "ID") %>%
+      dplyr::mutate(Muestra = muestra)
+  }
+
+  # Función interna para aplicar convertBondadesToList a cada elemento de resultados_bootstrap
+  applyConvertBondadesToList <- function(bootstrapResults) {
+    allBondadesDf <- purrr::map_dfr(seq_along(bootstrapResults$Results), function(muestra) {
+      convertBondadesToList(bootstrapResults$Results[[muestra]]$CombinedResults$Bondades, muestra)
+    }, .id = "MuestraID")
+
+    # Opcional: Convertir MuestraID a un número si es necesario
+    allBondadesDf <- allBondadesDf %>%
+      dplyr::mutate(MuestraID = as.integer(MuestraID))
+
+    return(allBondadesDf)
+  }
+
+  # Aplicar la función al conjunto de resultados de bootstrap
+  Bondades_ajuste <- applyConvertBondadesToList(resultados_bootstrap)
+
+  return(Bondades_ajuste)
+}
