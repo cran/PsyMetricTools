@@ -132,8 +132,12 @@ Versión mejorada de \code{boot_cfa_plot()} que mantiene el lenguaje
 \donttest{
 set.seed(123)
 n <- 300
-df <- as.data.frame(lapply(setNames(1:6, paste0("PHQ", 1:6)),
-                           function(i) sample(1:5, n, replace = TRUE)))
+# Likert items (1-5) generated from 2 correlated latent factors, 3 items each
+eta <- matrix(rnorm(n * 2), n, 2) \%*\% chol(0.7 * diag(2) + 0.3)
+df <- as.data.frame(sapply(1:6, function(j) as.numeric(cut(
+  0.7 * eta[, ceiling(j / 3)] + rnorm(n, 0, 0.7),
+  c(-Inf, -1.5, -0.5, 0.5, 1.5, Inf)))))
+names(df) <- paste0("PHQ", 1:6)
 m <- "F1 =~ PHQ1 + PHQ2 + PHQ3
       F2 =~ PHQ4 + PHQ5 + PHQ6"
 results_boot <- boot_cfa(new_df = df, model_string = m,

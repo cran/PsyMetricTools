@@ -31,6 +31,12 @@ boot_cfa(
 }
 \value{
 Data frame with bootstrap results including fit measures and reliability.
+  When the fitted model uses a robust test statistic (WLSMV, WLSM, MLR, MLM,
+  MLMV, ULSMV, ...), the columns `CFI`, `TLI`, `RMSEA`, `RMSEA.CI.LOWER` and
+  `RMSEA.CI.UPPER` inside `fit_measures1` hold the **scaled (robust)** values,
+  that is `cfi.scaled`, `tli.scaled` and `rmsea.scaled`. The `.scaled` suffix is
+  dropped from the column names so that the plotting functions keep working; the
+  `estimator` column states which estimator was detected.
 }
 \description{
 Performs bootstrap CFA with reliability estimation.
@@ -40,17 +46,12 @@ Performs bootstrap CFA with reliability estimation.
 # Create sample data with 9 Likert-type items (3 factors, 3 items each)
 set.seed(123)
 n <- 300
-data_cfa <- data.frame(
-  Item1 = sample(1:5, n, replace = TRUE),
-  Item2 = sample(1:5, n, replace = TRUE),
-  Item3 = sample(1:5, n, replace = TRUE),
-  Item4 = sample(1:5, n, replace = TRUE),
-  Item5 = sample(1:5, n, replace = TRUE),
-  Item6 = sample(1:5, n, replace = TRUE),
-  Item7 = sample(1:5, n, replace = TRUE),
-  Item8 = sample(1:5, n, replace = TRUE),
-  Item9 = sample(1:5, n, replace = TRUE)
-)
+# Likert items (1-5) generated from 3 correlated latent factors, 3 items each
+eta <- matrix(rnorm(n * 3), n, 3) \%*\% chol(0.7 * diag(3) + 0.3)
+data_cfa <- as.data.frame(sapply(1:9, function(j) as.numeric(cut(
+  0.7 * eta[, ceiling(j / 3)] + rnorm(n, 0, 0.7),
+  c(-Inf, -1.5, -0.5, 0.5, 1.5, Inf)))))
+names(data_cfa) <- paste0("Item", 1:9)
 
 # Define the CFA model
 model <- "

@@ -43,23 +43,12 @@ Performs exploratory factor analysis using lavaan with rotation.
 # Create sample data with 15 Likert-type items
 set.seed(123)
 n <- 300
-data_efa <- data.frame(
-  Item1 = sample(1:5, n, replace = TRUE),
-  Item2 = sample(1:5, n, replace = TRUE),
-  Item3 = sample(1:5, n, replace = TRUE),
-  Item4 = sample(1:5, n, replace = TRUE),
-  Item5 = sample(1:5, n, replace = TRUE),
-  Item6 = sample(1:5, n, replace = TRUE),
-  Item7 = sample(1:5, n, replace = TRUE),
-  Item8 = sample(1:5, n, replace = TRUE),
-  Item9 = sample(1:5, n, replace = TRUE),
-  Item10 = sample(1:5, n, replace = TRUE),
-  Item11 = sample(1:5, n, replace = TRUE),
-  Item12 = sample(1:5, n, replace = TRUE),
-  Item13 = sample(1:5, n, replace = TRUE),
-  Item14 = sample(1:5, n, replace = TRUE),
-  Item15 = sample(1:5, n, replace = TRUE)
-)
+# Likert items (1-5) generated from 3 correlated latent factors, 5 items each
+eta <- matrix(rnorm(n * 3), n, 3) \%*\% chol(0.7 * diag(3) + 0.3)
+data_efa <- as.data.frame(sapply(1:15, function(j) as.numeric(cut(
+  0.7 * eta[, ceiling(j / 5)] + rnorm(n, 0, 0.7),
+  c(-Inf, -1.5, -0.5, 0.5, 1.5, Inf)))))
+names(data_efa) <- paste0("Item", 1:15)
 
 # Perform EFA with 3 factors using WLSMV estimator
 result <- EFA_modern(

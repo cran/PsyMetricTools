@@ -11,11 +11,12 @@
 #' @examples
 #' \donttest{
 #' set.seed(123)
-#' mydata <- data.frame(
-#'   x1 = sample(1:5, 200, replace = TRUE),
-#'   x2 = sample(1:5, 200, replace = TRUE),
-#'   x3 = sample(1:5, 200, replace = TRUE)
-#' )
+#' # Likert items (1-5) generated from one latent factor, 3 items each
+#' eta <- matrix(rnorm(200 * 1), 200, 1) %*% chol(0.7 * diag(1) + 0.3)
+#' mydata <- as.data.frame(sapply(1:3, function(j) as.numeric(cut(
+#'   0.7 * eta[, ceiling(j / 3)] + rnorm(200, 0, 0.7),
+#'   c(-Inf, -1.5, -0.5, 0.5, 1.5, Inf)))))
+#' names(mydata) <- paste0("x", 1:3)
 #' model <- 'F1 =~ x1 + x2 + x3'
 #' fit <- safe_cfa(model, data = mydata, items = c("x1", "x2", "x3"))
 #' if (!is.null(fit)) summary(fit)
@@ -43,11 +44,12 @@ safe_cfa <- function(syntax, data, items, estimator = "WLSMV", stdlv = TRUE) {
 #' @examples
 #' \donttest{
 #' set.seed(123)
-#' mydata <- data.frame(
-#'   x1 = sample(1:5, 200, replace = TRUE),
-#'   x2 = sample(1:5, 200, replace = TRUE),
-#'   x3 = sample(1:5, 200, replace = TRUE)
-#' )
+#' # Likert items (1-5) generated from one latent factor, 3 items each
+#' eta <- matrix(rnorm(200 * 1), 200, 1) %*% chol(0.7 * diag(1) + 0.3)
+#' mydata <- as.data.frame(sapply(1:3, function(j) as.numeric(cut(
+#'   0.7 * eta[, ceiling(j / 3)] + rnorm(200, 0, 0.7),
+#'   c(-Inf, -1.5, -0.5, 0.5, 1.5, Inf)))))
+#' names(mydata) <- paste0("x", 1:3)
 #' model <- 'F1 =~ x1 + x2 + x3'
 #' fit <- safe_cfa(model, data = mydata, items = c("x1", "x2", "x3"))
 #' safe_measures(fit)
@@ -80,11 +82,12 @@ safe_measures <- function(fit, wanted = c("chisq.scaled", "df.scaled",
 #' @examples
 #' \donttest{
 #' set.seed(123)
-#' mydata <- data.frame(
-#'   x1 = sample(1:5, 200, replace = TRUE),
-#'   x2 = sample(1:5, 200, replace = TRUE),
-#'   x3 = sample(1:5, 200, replace = TRUE)
-#' )
+#' # Likert items (1-5) generated from one latent factor, 3 items each
+#' eta <- matrix(rnorm(200 * 1), 200, 1) %*% chol(0.7 * diag(1) + 0.3)
+#' mydata <- as.data.frame(sapply(1:3, function(j) as.numeric(cut(
+#'   0.7 * eta[, ceiling(j / 3)] + rnorm(200, 0, 0.7),
+#'   c(-Inf, -1.5, -0.5, 0.5, 1.5, Inf)))))
+#' names(mydata) <- paste0("x", 1:3)
 #' model <- 'F1 =~ x1 + x2 + x3'
 #' fit <- safe_cfa(model, data = mydata, items = c("x1", "x2", "x3"))
 #' latents <- lavaan::lavNames(fit, type = "lv")

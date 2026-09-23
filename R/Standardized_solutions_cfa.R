@@ -11,14 +11,12 @@
 #' # Create sample data
 #' set.seed(123)
 #' n <- 300
-#' data_cfa <- data.frame(
-#'   Item1 = sample(1:5, n, replace = TRUE),
-#'   Item2 = sample(1:5, n, replace = TRUE),
-#'   Item3 = sample(1:5, n, replace = TRUE),
-#'   Item4 = sample(1:5, n, replace = TRUE),
-#'   Item5 = sample(1:5, n, replace = TRUE),
-#'   Item6 = sample(1:5, n, replace = TRUE)
-#' )
+#' # Likert items (1-5) generated from 2 correlated latent factors, 3 items each
+#' eta <- matrix(rnorm(n * 2), n, 2) %*% chol(0.7 * diag(2) + 0.3)
+#' data_cfa <- as.data.frame(sapply(1:6, function(j) as.numeric(cut(
+#'   0.7 * eta[, ceiling(j / 3)] + rnorm(n, 0, 0.7),
+#'   c(-Inf, -1.5, -0.5, 0.5, 1.5, Inf)))))
+#' names(data_cfa) <- paste0("Item", 1:6)
 #'
 #' # Define CFA model
 #' model <- "

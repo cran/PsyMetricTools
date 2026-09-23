@@ -44,8 +44,12 @@ from bootstrap EFA results. Style inspired by Solomon Kurz.
 \donttest{
 set.seed(123)
 n <- 200
-data <- as.data.frame(lapply(setNames(1:6, paste0("PBA", 1:6)),
-                             function(i) sample(1:5, n, replace = TRUE)))
+# Likert items (1-5) generated from 2 correlated latent factors, 3 items each
+eta <- matrix(rnorm(n * 2), n, 2) \%*\% chol(0.7 * diag(2) + 0.3)
+data <- as.data.frame(sapply(1:6, function(j) as.numeric(cut(
+  0.7 * eta[, ceiling(j / 3)] + rnorm(n, 0, 0.7),
+  c(-Inf, -1.5, -0.5, 0.5, 1.5, Inf)))))
+names(data) <- paste0("PBA", 1:6)
 results_boot_efa <- boot_efa(
   data = data, n_factors = 2, n_items = 6, name_items = "PBA",
   rotation = "oblimin", n_replications = 5
